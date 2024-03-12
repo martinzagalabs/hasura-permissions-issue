@@ -1,0 +1,7 @@
+- role_name: combined
+  role_set:
+    - customer
+    - select_by_pk
+- role_name: single
+  role_set:
+    - customer

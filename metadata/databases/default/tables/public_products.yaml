@@ -1,0 +1,35 @@
+table:
+  name: products
+  schema: public
+select_permissions:
+  - role: customer
+    permission:
+      columns:
+        - id
+        - name
+        - public_a
+        - public_b
+      filter:
+        security:
+          _eq: allowed
+      query_root_fields:
+        - select
+      subscription_root_fields:
+        - select
+    comment: ""
+  - role: select_by_pk
+    permission:
+      columns:
+        - name
+        - public_a
+        - public_b
+        - security
+        - semi_public_c
+        - semi_public_d
+        - id
+      filter: {}
+      query_root_fields:
+        - select_by_pk
+      subscription_root_fields:
+        - select_by_pk
+    comment: ""

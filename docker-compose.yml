@@ -1,0 +1,41 @@
+version: '3.3'
+
+volumes:
+  dbbackups:
+  postgis-data:
+
+services:
+  db:
+    container_name: hasura_db_local
+    image: kartoza/postgis:14-3.1
+    volumes:
+      - postgis-data:/var/lib/postgresql
+      - dbbackups:/backups
+    environment:
+      # If you need to create multiple database you can add coma separated databases eg gis,data
+      - POSTGRES_DB=default
+      - POSTGRES_USER=docker
+      - POSTGRES_PASS=docker
+      - ALLOW_IP_RANGE=0.0.0.0/0
+      # Add extensions you need to be enabled by default in the DB. Default are the five specified below
+      - POSTGRES_MULTIPLE_EXTENSIONS=postgis,hstore,postgis_topology,postgis_raster,pgrouting
+    ports:
+      - 5432:5432
+    restart: unless-stopped
+    healthcheck:
+      test: "exit 0"
+
+  hasura:
+    image: hasura/graphql-engine:v2.33.4
+    container_name: hasura_local
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - "db"
+    environment:
+      HASURA_GRAPHQL_ADMIN_SECRET: admin_secret_for_testing
+      HASURA_GRAPHQL_DATABASE_URL: postgres://docker:docker@hasura_db_local:5432/postgres
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "false"
+      HASURA_GRAPHQL_JWT_SECRET: '{"allowed_skew": 86400, "type": "RS512", "key": "-----BEGIN CERTIFICATE-----\nMIIDCzCCAfOgAwIBAgIJP2a8jaimp1doMA0GCSqGSIb3DQEBCwUAMCMxITAfBgNV\nBAMTGGx1Y3JhLWxvY2FsLnVzLmF1dGgwLmNvbTAeFw0yMjAxMjYxNTQxMTZaFw0z\nNTEwMDUxNTQxMTZaMCMxITAfBgNVBAMTGGx1Y3JhLWxvY2FsLnVzLmF1dGgwLmNv\nbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALvNT1SP/cVwz0tRQsUG\nh9AGmGF6feUZ+GiEklKLK7X72S2YVM42MscnTB0e5AgGcJUnoXp8tNoCVg3ksmWN\nAojBv5681q7iMhb2xVNXHaCpjNRVFiMku51753WSz3RwAgkHB4SZrKgWqUc0AHng\nZwm+7hkdqf0MSc3anjkTYzK1rzE+kQiGeVi4X0cTq2DUfYhkAjFntnhHEtj0GRXB\nTxoy4voxJdUWYG2KYVFiwfSIYhBaM4fZqIIGUVDFXBMqaJBo+16JNNh5rTrA01gB\nO+NrJb4PmcxefouGieEaRYnSMaicYFE5wUZ/fbAmPCtCGWdMPoHE8RVZYkyMfnYA\nd+ECAwEAAaNCMEAwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUwUKjqsU4Ue1i\n9OPHxd49f+zu9NwwDgYDVR0PAQH/BAQDAgKEMA0GCSqGSIb3DQEBCwUAA4IBAQAm\nWdoaH6v7uQpNpPxmGr+oMyl5Ccdz+lkBvmBSb7CBd89Nwf2Cm0Sw8d7aFU3fcIln\niBrpwuNNZfhQi/JQZOe/PUyTA7shjo+Na4x9ZURhjSJHomAcTXdM/tPtSyfmBmVb\n8K9Q3UG7dBcDQIeUpASfiYaJIVTljXvXTXWouJpNCRDL7oz1DwY0MvZks8kvhVRq\nXR4ZLSivsrNwdCCnyWziSjD7EORY/SR+T0mSWgqvn38SN4Tu1awCMqJZuXmfW2s/\niC1E1YpgP88SguQjmX7oK4DCRXnIJINU92Ij8pmOFrvfBPRxZlsEZ6Ls2ey7g7el\nBpmuPu1W48s6ryZz6ijP\n-----END CERTIFICATE-----"}'
+      HASURA_GRAPHQL_UNAUTHORIZED_ROLE: anonymous
