@@ -41,6 +41,7 @@ query Example {
   products {
     id
     name
+    # This next 2 properties should not be available
     semi_public_c
     semi_public_d
   }
